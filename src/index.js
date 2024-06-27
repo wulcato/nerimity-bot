@@ -1,12 +1,6 @@
 import config from './config.js';
 import {Client} from '@nerimity/nerimity.js';
 import { addXp, calculateRequiredXp, createUser, getServer, getUser } from './db.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
-
-
 
 const bot = new Client();
 
@@ -42,9 +36,6 @@ bot.on("messageCreate", async (message) => {
 
     if (args[0] === cmd("chat")) {
         const msg = args.slice(1).join(" ");
-        const result = model.generateContent(msg);
-        const response = (await result).response;
-        return message.reply(response.text())
     }
 })
 
