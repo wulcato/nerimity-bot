@@ -7,11 +7,13 @@ const bot = new Client();
 
 bot.on("ready", () => {
     console.log(`Logged in as ${bot.user.username}!`);
-    bot.user.setActivity({
-        action: "Playing",
-        name: "Overwatch 2",
-        startedAt: Date.now()
-    })
+    if (!config.dev) {
+        bot.user.setActivity({
+            action: "Playing",
+            name: "Overwatch 2",
+            startedAt: Date.now()
+        })
+    }
 })
 
 const PREFIX = config.dev ? "dev!" : "!";
