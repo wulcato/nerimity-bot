@@ -106,7 +106,7 @@ const htmlProfileBuilder = (server, user, profile) => {
             .ctn {
                 font-family: monospace;
                 background-color: #000;
-                margin: 6px;
+                margin-top: 6px;
                 text-align: center;
                 border-radius: 6px;
                 overflow: hidden;
