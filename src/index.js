@@ -11,7 +11,7 @@ bot.on("ready", () => {
         bot.user.setActivity({
             action: "Playing",
             name: "Overwatch 2",
-            startedAt: Date.now()
+            startedAt: 1468882814000 // ana release date 19 july 2016
         })
     }
 })
