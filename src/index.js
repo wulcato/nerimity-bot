@@ -1,6 +1,6 @@
 import config from './config.js';
 import {Client} from '@nerimity/nerimity.js';
-import { addXp, calculateRequiredXp, createUser, getServer, getUser } from './db.js';
+import { addXp, calculateRequiredXp, createUser, getGlobalLeaderBoard, getServer, getServerLeaderBoard, getUser } from './db.js';
 
 const bot = new Client();
 
@@ -33,6 +33,14 @@ bot.on("messageCreate", async (message) => {
 
     const args = message.content?.split?.(" ") || [];
 
+    if (args[0] === cmd("globalLeaderBoard")) {
+        return leaderBoardCmd(message, true)
+    }
+
+    if (args[0] === cmd("leaderBoard")) {
+        return leaderBoardCmd(message)
+    }
+
     if (args[0] === cmd("profile")) {
         return profileCmd(message, "server")
     }
@@ -44,6 +52,33 @@ bot.on("messageCreate", async (message) => {
     //     const msg = args.slice(1).join(" ");
     // }
 })
+
+
+
+/**
+ * Handles the leaderBoard command by retrieving user information and responding with a leaderboard.
+ * 
+ * @param {import("@nerimity/nerimity.js/build/Client.js").Message} message - The message object containing the user's command.
+ */
+const leaderBoardCmd = async (message, global = false) => {
+
+
+    
+    if (global) {
+        const users = await getGlobalLeaderBoard();
+        message.reply("", {
+            htmlEmbed: htmlLeaderBoardBuilder(users.map((user) => ({username: user.username, totalXP: user.totalXp})), "global")
+        })
+        
+    } else {
+        const servers = await getServerLeaderBoard(message.channel.serverId);
+        message.reply("", {
+            htmlEmbed: htmlLeaderBoardBuilder(servers.map((server) => ({username: server.user.username, totalXP: server.totalXp})), "server")
+        })
+    }
+
+    
+}
 
 
 /**
@@ -140,6 +175,46 @@ const htmlProfileBuilder = (server, user, profile) => {
         </style>
     `
 
+}
+/** *
+ * @param {{username: string, totalXP: string}[]} users 
+ * @param {"server" | "global"} profile 
+ * @return {string} The HTML profile.
+ */
+const htmlLeaderBoardBuilder = (users, profile) => {
+
+
+    return `
+        <div class="ctn">
+            <div class="h">Leader board<div class="sh">(${profile === "server" ? 'Server' : 'Global'} Profile)</div></div>
+
+            ${
+                users.map((user) => `
+                    <div>${user.username} ${user.totalXP}XP</div>
+                `).join("")
+            }
+
+        </div>
+        <style>
+            .ctn {
+                font-family: monospace;
+                background-color: #000;
+                margin-top: 6px;
+                text-align: center;
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            .h {
+                background-color: var(--primary-color);
+                padding: 6px;
+                margin-bottom: 6px;
+            }
+            .sh {
+                font-size: 12px;
+                color: #ffffff9c;
+            }
+        </style>
+    `
 }
 
 bot.login(config.token);

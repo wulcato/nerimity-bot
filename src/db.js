@@ -3,6 +3,27 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 
+export const getGlobalLeaderBoard = () => {
+    return prisma.user.findMany({
+        take: 10,
+        orderBy: {
+            totalXp: 'desc'
+        },
+    });
+}
+export const getServerLeaderBoard = (serverId) => {
+    return prisma.server.findMany({
+        take: 10,
+        where: {
+            id: serverId,
+        },
+        include: {user: {select: {username: true}}},
+        orderBy: {
+            totalXp: 'desc'
+        },
+    });
+}
+
 export const getServer = async (serverId, userId) => {
     return prisma.server.findUnique({
         where: {
