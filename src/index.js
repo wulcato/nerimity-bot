@@ -1,85 +1,111 @@
-import config from './config.js';
-import {Client} from '@nerimity/nerimity.js';
-import { addXp, calculateRequiredXp, createUser, getGlobalLeaderBoard, getServer, getServerLeaderBoard, getUser } from './db.js';
+import config from "./config.js";
+import { Client } from "@nerimity/nerimity.js";
+import {
+  addXp,
+  calculateRequiredXp,
+  createUser,
+  getGlobalLeaderBoard,
+  getServer,
+  getServerLeaderBoard,
+  getUser,
+} from "./db.js";
 
 const bot = new Client();
 
-
 bot.on("ready", () => {
-    console.log(`Logged in as ${bot.user.username}!`);
-    if (!config.dev) {
-        bot.user.setActivity({
-            action: "Playing",
-            name: "Overwatch 2",
-            startedAt: 1468882814000 // ana release date 19 july 2016
-        })
-    }
-})
+  console.log(`Logged in as ${bot.user.username}!`);
+  if (!config.dev) {
+    bot.user.setActivity({
+      action: "Playing",
+      name: "Overwatch 2",
+      startedAt: 1468882814000, // ana release date 19 july 2016
+    });
+  }
+});
 
 const PREFIX = config.dev ? "dev!" : "!";
 const cmd = (command) => PREFIX + command;
 
-
 bot.on("messageCreate", async (message) => {
-    if (message.user.bot) return;
-    if (!message?.channel?.serverId) return;
-    
-    await addXp(message.user.id, message.channel.serverId, message.user.username);
+  if (message.user.bot) return;
+  if (!message?.channel?.serverId) return;
 
-    if (message?.content === cmd("ping")) {
-        const t0 = Date.now();
-        return message.reply("Pong!").then(m => m.edit(`${m.content} (${Date.now() - t0}ms)`));
-    }
+  await addXp(message.user.id, message.channel.serverId, message.user.username);
 
-    const args = message.content?.split?.(" ") || [];
+  if (message?.content === cmd("ping")) {
+    const t0 = Date.now();
+    return message
+      .reply("Pong!")
+      .then((m) => m.edit(`${m.content} (${Date.now() - t0}ms)`));
+  }
 
-    if (args[0] === cmd("globalLeaderBoard")) {
-        return leaderBoardCmd(message, true)
-    }
+  const args = message.content?.split?.(" ") || [];
 
-    if (args[0] === cmd("leaderBoard")) {
-        return leaderBoardCmd(message)
-    }
+  if (args[0] === cmd("buttonTest")) {
+    return message.reply("Click on the button below.", {
+      buttons: [{ id: "clickMeButton", label: "Click Me", style: "primary" }],
+    });
+  }
 
-    if (args[0] === cmd("profile")) {
-        return profileCmd(message, "server")
-    }
-    if (args[0] === cmd("globalProfile")) {
-        return profileCmd(message, "user")
-    }
+  if (args[0] === cmd("globalLeaderBoard")) {
+    return leaderBoardCmd(message, true);
+  }
 
-    // if (args[0] === cmd("chat")) {
-    //     const msg = args.slice(1).join(" ");
-    // }
-})
+  if (args[0] === cmd("leaderBoard")) {
+    return leaderBoardCmd(message);
+  }
 
+  if (args[0] === cmd("profile")) {
+    return profileCmd(message, "server");
+  }
+  if (args[0] === cmd("globalProfile")) {
+    return profileCmd(message, "user");
+  }
 
+  // if (args[0] === cmd("chat")) {
+  //     const msg = args.slice(1).join(" ");
+  // }
+});
+
+bot.on("messageButtonClick", (button) => {
+  if (button.id === "clickMeButton") {
+    button.respond({
+      title: "Hey!",
+      content: `Hey there **${button.user?.username}**!`,
+    });
+  }
+});
 
 /**
  * Handles the leaderBoard command by retrieving user information and responding with a leaderboard.
- * 
+ *
  * @param {import("@nerimity/nerimity.js/build/Client.js").Message} message - The message object containing the user's command.
  */
 const leaderBoardCmd = async (message, global = false) => {
-
-
-    
-    if (global) {
-        const users = await getGlobalLeaderBoard();
-        message.reply("", {
-            htmlEmbed: htmlLeaderBoardBuilder(users.map((user) => ({username: user.username, totalXP: user.totalXp})), "global")
-        })
-        
-    } else {
-        const servers = await getServerLeaderBoard(message.channel.serverId);
-        message.reply("", {
-            htmlEmbed: htmlLeaderBoardBuilder(servers.map((server) => ({username: server.user.username, totalXP: server.totalXp})), "server")
-        })
-    }
-
-    
-}
-
+  if (global) {
+    const users = await getGlobalLeaderBoard();
+    message.reply("", {
+      htmlEmbed: htmlLeaderBoardBuilder(
+        users.map((user) => ({
+          username: user.username,
+          totalXP: user.totalXp,
+        })),
+        "global"
+      ),
+    });
+  } else {
+    const servers = await getServerLeaderBoard(message.channel.serverId);
+    message.reply("", {
+      htmlEmbed: htmlLeaderBoardBuilder(
+        servers.map((server) => ({
+          username: server.user.username,
+          totalXP: server.totalXp,
+        })),
+        "server"
+      ),
+    });
+  }
+};
 
 /**
  * Handles the profile command by retrieving user information and responding with XP, level, and username.
@@ -87,51 +113,49 @@ const leaderBoardCmd = async (message, global = false) => {
  * @param {import("@nerimity/nerimity.js/build/Client.js").Message} message - The message object containing the user's command.
  */
 const profileCmd = async (message, profile) => {
+  const args = message.content.split(" ");
+  const userId = args[1] || message.user.id;
 
-    const args = message.content.split(" ");
-    const userId = args[1] || message.user.id;
+  let user = await getUser(userId);
 
-    let user = await getUser(userId);
-    
-    const server = await getServer(message.channel.serverId, userId)
+  const server = await getServer(message.channel.serverId, userId);
 
-    if (!user) {
-        message.reply("User not found.");
-        return;
-    }
-    if (profile === "server" && !server) {
-        message.reply("User not found.");
-        return;
-    }
+  if (!user) {
+    message.reply("User not found.");
+    return;
+  }
+  if (profile === "server" && !server) {
+    message.reply("User not found.");
+    return;
+  }
 
-    message.reply("", {
-        htmlEmbed: htmlProfileBuilder(server, user, profile)
-    })
-
-
-}
-
-
-
+  message.reply("", {
+    htmlEmbed: htmlProfileBuilder(server, user, profile),
+  });
+};
 
 /**
  * Builds an HTML profile based on the provided server and user information.
  *
  * @param {import('@prisma/client').Server} server - The server information.
  * @param {import('@prisma/client').User} user - The user information.
- * @param {"server" | "user"} profile 
+ * @param {"server" | "user"} profile
  * @return {string} The HTML profile.
  */
 const htmlProfileBuilder = (server, user, profile) => {
+  const level = profile === "server" ? server.level : user.level;
+  const currentXP = profile === "server" ? server.xp : user.xp;
+  const xpRequired =
+    profile === "server"
+      ? calculateRequiredXp(server.level)
+      : calculateRequiredXp(user.level);
+  const percent = (currentXP / xpRequired) * 100;
 
-    const level = profile === "server" ? server.level : user.level
-    const currentXP = profile === "server" ? server.xp : user.xp;
-    const xpRequired = profile === "server" ? calculateRequiredXp(server.level) : calculateRequiredXp(user.level);
-    const percent = (currentXP / xpRequired) * 100;
-
-    return `
+  return `
         <div class="ctn">
-            <div class="h">${user.username}<div class="sh">(${profile === "server" ? 'Server' : 'User'} Profile)</div></div>
+            <div class="h">${user.username}<div class="sh">(${
+    profile === "server" ? "Server" : "User"
+  } Profile)</div></div>
             <div class="t">Level ${level}</div>
             <div class="t">${currentXP}/${xpRequired}</div>
             <div class="b"><div style="width: ${percent}%"></div></div>
@@ -173,26 +197,27 @@ const htmlProfileBuilder = (server, user, profile) => {
                 background-color: #fff;
             }
         </style>
-    `
-
-}
+    `;
+};
 /** *
- * @param {{username: string, totalXP: string}[]} users 
- * @param {"server" | "global"} profile 
+ * @param {{username: string, totalXP: string}[]} users
+ * @param {"server" | "global"} profile
  * @return {string} The HTML profile.
  */
 const htmlLeaderBoardBuilder = (users, profile) => {
-
-
-    return `
+  return `
         <div class="ctn">
-            <div class="h">Leader board<div class="sh">(${profile === "server" ? 'Server' : 'Global'} Profile)</div></div>
+            <div class="h">Leader board<div class="sh">(${
+              profile === "server" ? "Server" : "Global"
+            } Profile)</div></div>
 
-            ${
-                users.map((user) => `
+            ${users
+              .map(
+                (user) => `
                     <div>${user.username} ${user.totalXP}XP</div>
-                `).join("")
-            }
+                `
+              )
+              .join("")}
 
         </div>
         <style>
@@ -214,7 +239,7 @@ const htmlLeaderBoardBuilder = (users, profile) => {
                 color: #ffffff9c;
             }
         </style>
-    `
-}
+    `;
+};
 
 bot.login(config.token);
