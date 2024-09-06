@@ -9,6 +9,7 @@ import {
   getServerLeaderBoard,
   getUser,
 } from "./db.js";
+import { getGroqChatCompletion } from "./groq.js";
 
 const bot = new Client();
 
@@ -45,6 +46,10 @@ bot.on("messageCreate", async (message) => {
     return message.reply("Click on the button below.", {
       buttons: [{ id: "clickMeButton", label: "Click Me", style: "primary" }],
     });
+  }
+
+  if (args[0] === cmd("ai")) {
+    return aiChat(message);
   }
 
   if (args[0] === cmd("globalLeaderBoard")) {
@@ -132,6 +137,22 @@ const profileCmd = async (message, profile) => {
   message.reply("", {
     htmlEmbed: htmlProfileBuilder(server, user, profile),
   });
+};
+/**
+ *
+ * @param {import("@nerimity/nerimity.js/build/Client.js").Message} message - The message object containing the user's command.
+ */
+const aiChat = async (message) => {
+  const args = message.content.split(" ").slice(1);
+
+  const res = await getGroqChatCompletion(args.join(" ")).catch((err) =>
+    console.log(err)
+  );
+
+  if (!res) {
+    return message.channel.send("Something went wrong. Check console.");
+  }
+  message.channel.send(res);
 };
 
 /**
