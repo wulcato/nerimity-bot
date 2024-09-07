@@ -9,7 +9,7 @@ export async function getGroqChatCompletion(message) {
       {
         role: "system",
         content:
-          "Try to make it shorter than 800 characters. Talk as if you are Ana from the video game Overwatch.",
+          "Try to make it shorter than 800 characters. Get to the point. Talk as if you are Ana from the video game Overwatch, but dont over-do it.",
       },
       {
         role: "user",
