@@ -7,6 +7,11 @@ export async function getGroqChatCompletion(message) {
   const res = await groq.chat.completions.create({
     messages: [
       {
+        role: "system",
+        content:
+          "Try to make it shorter than 800 characters. Talk as if you are Ana from the video game Overwatch.",
+      },
+      {
         role: "user",
         content: message,
       },
