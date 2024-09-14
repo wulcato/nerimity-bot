@@ -2,6 +2,7 @@ export const command = "Wordle";
 export const description = "Multiplayer Wordle game!";
 import fs from "fs/promises";
 import { addXp } from "../db.js";
+import { define } from "../dictionary.js";
 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";

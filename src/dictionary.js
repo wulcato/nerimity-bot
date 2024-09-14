@@ -3,7 +3,7 @@
  * @param {string} word
  * @returns {Promise<string | undefined>}
  */
-const define = async (word) => {
+export const define = async (word) => {
   const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
   try {
     const res = await fetch(url);
