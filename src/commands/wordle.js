@@ -105,7 +105,7 @@ export const onMessage = async (bot, message) => {
 
   await channel.send("# " + matchedWords(lobby.word, fiveLetterWord));
   if (fiveLetterWord === lobby.word) {
-    await channel.send(`${message.user} won! (+50xp)`);
+    const msg = await channel.send(`${message.user} won! (+50xp)`);
     delete lobbies[message.channel.serverId];
     await addXp(
       message.user.id,
@@ -113,6 +113,10 @@ export const onMessage = async (bot, message) => {
       message.user.username,
       50
     );
+    const definition = await define(fiveLetterWord);
+    if (definition) {
+      await msg.edit(msg.content + `\n\n${fiveLetterWord}: ` + definition);
+    }
   }
 };
 
