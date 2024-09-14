@@ -3,8 +3,13 @@ export const description = "Multiplayer Wordle game!";
 import fs from "fs/promises";
 import { addXp } from "../db.js";
 
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const words = JSON.parse(
-  await fs.readFile("./src/5-letter-words.json", "utf-8")
+  await fs.readFile(__dirname + "/../5-letter-words.json", "utf-8")
 );
 
 const randomWord = () => {
