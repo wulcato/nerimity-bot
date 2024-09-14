@@ -10,8 +10,9 @@ import {
   getUser,
 } from "./db.js";
 import { getGroqChatCompletion } from "./groq.js";
-
+import { commands, setupCommands } from "./commands.js";
 const bot = new Client();
+await setupCommands();
 
 bot.on("ready", () => {
   console.log(`Logged in as ${bot.user.username}!`);
@@ -24,7 +25,7 @@ bot.on("ready", () => {
   }
 });
 
-const PREFIX = config.dev ? "dev!" : "!";
+const PREFIX = config.prefix || "!";
 const cmd = (command) => PREFIX + command;
 
 bot.on("messageCreate", async (message) => {
@@ -33,24 +34,21 @@ bot.on("messageCreate", async (message) => {
 
   await addXp(message.user.id, message.channel.serverId, message.user.username);
 
-  if (message?.content === cmd("ping")) {
-    const t0 = Date.now();
-    return message
-      .reply("Pong!")
-      .then((m) => m.edit(`${m.content} (${Date.now() - t0}ms)`));
-  }
-
   const args = message.content?.split?.(" ") || [];
 
-  if (args[0] === cmd("buttonTest")) {
-    return message.reply("Click on the button below.", {
-      buttons: [{ id: "clickMeButton", label: "Click Me", style: "primary" }],
-    });
-  }
+  const isCommandMessage = message.content.startsWith(cmd(""));
 
-  if (args[0] === cmd("ai")) {
-    return aiChat(message);
+  if (isCommandMessage) {
+    const commandModule = commands.find(
+      (c) => cmd(c.command).toLowerCase() === args[0].toLowerCase()
+    );
+    if (commandModule) {
+      return commandModule.run(bot, args, message);
+    }
   }
+  commands.forEach((command) => {
+    command.onMessage?.(bot, message);
+  });
 
   if (args[0] === cmd("globalLeaderBoard")) {
     return leaderBoardCmd(message, true);
@@ -66,10 +64,6 @@ bot.on("messageCreate", async (message) => {
   if (args[0] === cmd("globalProfile")) {
     return profileCmd(message, "user");
   }
-
-  // if (args[0] === cmd("chat")) {
-  //     const msg = args.slice(1).join(" ");
-  // }
 });
 
 bot.on("messageButtonClick", (button) => {
@@ -142,18 +136,6 @@ const profileCmd = async (message, profile) => {
  *
  * @param {import("@nerimity/nerimity.js/build/Client.js").Message} message - The message object containing the user's command.
  */
-const aiChat = async (message) => {
-  const args = message.content.split(" ").slice(1);
-
-  const res = await getGroqChatCompletion(args.join(" ")).catch((err) =>
-    console.log(err)
-  );
-
-  if (!res) {
-    return message.channel.send("Something went wrong. Check console.");
-  }
-  message.channel.send(res);
-};
 
 /**
  * Builds an HTML profile based on the provided server and user information.

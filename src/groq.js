@@ -1,7 +1,7 @@
 import Groq from "groq-sdk";
 import config from "./config.js";
 
-const groq = new Groq({ apiKey: config.groqApiKey });
+const groq = config.groqApiKey ? new Groq({ apiKey: config.groqApiKey }) : {};
 
 export async function getGroqChatCompletion(message) {
   const res = await groq.chat.completions.create({
