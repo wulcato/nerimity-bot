@@ -16,9 +16,13 @@ const randomWord = () => {
   return words[Math.floor(Math.random() * words.length)];
 };
 
-const orangeHex = "[#FF9800]";
-const greenHex = "[#4CAF50]";
-const greyHex = "[#9E9E9E]";
+const orangeHex = " ORANGE";
+const greenHex = " GREEN";
+const greyHex = " ";
+
+// const orangeHex = "[#FF9800]";
+// const greenHex = "[#4CAF50]";
+// const greyHex = "[#9E9E9E]";
 
 const matchedWords = (word, guess) => {
   let str = "";
@@ -32,11 +36,11 @@ const matchedWords = (word, guess) => {
 
   for (let i = 0; i < word.length; i++) {
     if (word[i] === guess[i]) {
-      let totalChars = orangeCharCount[guess[i]] || wordCharCount[guess[i]];
+      let totalChars = orangeCharCount[guess[i]] ?? wordCharCount[guess[i]];
       totalChars--;
       orangeCharCount[guess[i]] = totalChars;
     } else if (word.includes(guess[i])) {
-      let totalChars = orangeCharCount[guess[i]] || wordCharCount[guess[i]];
+      let totalChars = orangeCharCount[guess[i]] ?? wordCharCount[guess[i]];
       orangeCharCount[guess[i]] = totalChars;
     }
   }
@@ -59,6 +63,8 @@ const matchedWords = (word, guess) => {
 
   return str;
 };
+
+console.log(matchedWords("dowdy", "dooms"));
 
 /**
  * @type {Record<string, {
