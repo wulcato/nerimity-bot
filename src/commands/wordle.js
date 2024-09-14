@@ -129,7 +129,6 @@ const startCommand = async (bot, args, message) => {
   }
 
   const word = randomWord();
-  console.log(word);
   lobbies[channel.serverId] = {
     word,
   };
