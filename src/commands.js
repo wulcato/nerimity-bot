@@ -1,6 +1,8 @@
 import fs from "fs/promises";
 
-const commandFiles = await fs.readdir("./src/commands");
+const __dirname = import.meta.dirname;
+
+const commandFiles = await fs.readdir(__dirname + "/commands");
 
 /** @type {{command: string, description: string, run: (bot, args, message) => void, onMessage?: (bot, message) => void}[]} */
 export let commands = [];
