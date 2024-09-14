@@ -16,9 +16,9 @@ const randomWord = () => {
   return words[Math.floor(Math.random() * words.length)];
 };
 
-const orangeHex = " ORANGE";
-const greenHex = " GREEN";
-const greyHex = " GREY";
+const orangeHex = "[#FF9800]";
+const greenHex = "[#4CAF50]";
+const greyHex = "[#9E9E9E]";
 
 const matchedWords = (word, guess) => {
   let str = "";
