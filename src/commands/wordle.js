@@ -94,7 +94,6 @@ export const onMessage = async (bot, message) => {
   if (!channel.name.toLowerCase().includes("wordle")) {
     return;
   }
-  await message.delete();
   const isFiveLetterWord = message.content.length === 5;
   if (!isFiveLetterWord) {
     return;
@@ -102,6 +101,7 @@ export const onMessage = async (bot, message) => {
   const fiveLetterWord = message.content.toLowerCase();
   const isValidWord = words.includes(fiveLetterWord);
   if (!isValidWord) return;
+  await message.delete();
 
   await channel.send("# " + matchedWords(lobby.word, fiveLetterWord));
   if (fiveLetterWord === lobby.word) {
