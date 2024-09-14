@@ -102,7 +102,11 @@ export const onMessage = async (bot, message) => {
   const fiveLetterWord = message.content.toLowerCase();
   const isValidWord = words.includes(fiveLetterWord);
   if (!isValidWord) return;
-  await message.delete();
+  const res = await message.delete().catch(() => {
+    console.log("Missing permission: Delete message.");
+    return false;
+  });
+  if (res === false) return;
 
   await channel.send("# " + matchedWords(lobby.word, fiveLetterWord));
   if (fiveLetterWord === lobby.word) {
