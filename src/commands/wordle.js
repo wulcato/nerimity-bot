@@ -17,9 +17,9 @@ const randomWord = () => {
 };
 console.log(randomWord());
 
-const orangeHex = "[#FF9800]";
-const greenHex = "[#4CAF50]";
-const greyHex = "[#9E9E9E]";
+const orangeHex = " ORANGE";
+const greenHex = " GREEN";
+const greyHex = " GREY";
 
 const matchedWords = (word, guess) => {
   let str = "";
@@ -33,13 +33,12 @@ const matchedWords = (word, guess) => {
 
   for (let i = 0; i < word.length; i++) {
     if (word[i] === guess[i]) {
-      let totalChars = wordCharCount[word[i]];
+      let totalChars = orangeCharCount[guess[i]] || wordCharCount[guess[i]];
       totalChars--;
-      orangeCharCount[word[i]] = totalChars;
+      orangeCharCount[guess[i]] = totalChars;
     } else if (word.includes(guess[i])) {
-      let totalChars = wordCharCount[word[i]];
-      totalChars--;
-      orangeCharCount[word[i]] = totalChars;
+      let totalChars = orangeCharCount[guess[i]] || wordCharCount[guess[i]];
+      orangeCharCount[guess[i]] = totalChars;
     }
   }
 
