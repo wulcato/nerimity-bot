@@ -103,9 +103,9 @@ export const onMessage = async (bot, message) => {
   const isValidWord = words.includes(fiveLetterWord);
   if (!isValidWord) return;
 
-  channel.send("# " + matchedWords(lobby.word, fiveLetterWord));
+  await channel.send("# " + matchedWords(lobby.word, fiveLetterWord));
   if (fiveLetterWord === lobby.word) {
-    channel.send(`${message.user} won! (+50xp)`);
+    await channel.send(`${message.user} won! (+50xp)`);
     delete lobbies[message.channel.serverId];
     await addXp(
       message.user.id,
