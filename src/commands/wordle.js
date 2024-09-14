@@ -15,6 +15,7 @@ const words = JSON.parse(
 const randomWord = () => {
   return words[Math.floor(Math.random() * words.length)];
 };
+console.log(randomWord());
 
 const orangeHex = "[#FF9800]";
 const greenHex = "[#4CAF50]";
