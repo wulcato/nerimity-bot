@@ -9,11 +9,19 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const words = JSON.parse(
+const words5 = JSON.parse(
   await fs.readFile(__dirname + "/../5-letter-words.json", "utf-8")
 );
+const words6 = JSON.parse(
+  await fs.readFile(__dirname + "/../6-letter-words.json", "utf-8")
+);
 
-const randomWord = () => {
+const wordsObj = {
+  5: words5,
+  6: words6,
+};
+
+const randomWord = (words = words5) => {
   return words[Math.floor(Math.random() * words.length)];
 };
 
@@ -64,6 +72,7 @@ const matchedWords = (word, guess) => {
 /**
  * @type {Record<string, {
  *   word: string
+ *   length: number
  * }>}
  */
 const lobbies = {};
@@ -95,12 +104,12 @@ export const onMessage = async (bot, message) => {
   if (!channel.name.toLowerCase().includes("wordle")) {
     return;
   }
-  const isFiveLetterWord = message.content.length === 5;
-  if (!isFiveLetterWord) {
+  const isLengthWord = message.content.length === lobby.length;
+  if (!isLengthWord) {
     return;
   }
-  const fiveLetterWord = message.content.toLowerCase();
-  const isValidWord = words.includes(fiveLetterWord);
+  const letterWord = message.content.toLowerCase();
+  const isValidWord = wordsObj[lobby.length].includes(letterWord);
   if (!isValidWord) return;
   const res = await message.delete().catch(() => {
     console.log("Missing permission: Delete message.");
@@ -108,8 +117,8 @@ export const onMessage = async (bot, message) => {
   });
   if (res === false) return;
 
-  await channel.send("# " + matchedWords(lobby.word, fiveLetterWord));
-  if (fiveLetterWord === lobby.word) {
+  await channel.send("# " + matchedWords(lobby.word, letterWord));
+  if (letterWord === lobby.word) {
     const msg = await channel.send(`${message.user} won! (+50xp)`);
     delete lobbies[message.channel.serverId];
     await addXp(
@@ -118,9 +127,9 @@ export const onMessage = async (bot, message) => {
       message.user.username,
       50
     );
-    const definition = await define(fiveLetterWord);
+    const definition = await define(letterWord);
     if (definition) {
-      await msg.edit(msg.content + `\n\n${fiveLetterWord}: ` + definition);
+      await msg.edit(msg.content + `\n\n${letterWord}: ` + definition);
     }
   }
 };
@@ -140,10 +149,17 @@ const startCommand = async (bot, args, message) => {
   if (isAlreadyStarted) {
     return channel.send("There is already a game in progress.");
   }
+  const letterWords = parseInt(args[2]) || 5;
+  if (letterWords !== 5 && letterWords !== 6) {
+    return channel.send("Only 5 and 6 letter words are allowed.");
+  }
 
-  const word = randomWord();
+  const word = randomWord(wordsObj[letterWords]);
   lobbies[channel.serverId] = {
     word,
+    length: letterWords,
   };
-  channel.send("Game Started! Start making your guesses.");
+  channel.send(
+    "Game Started! Start making your guesses. (" + letterWords + " letters)"
+  );
 };
