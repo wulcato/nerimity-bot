@@ -117,10 +117,10 @@ export const onMessage = async (bot, message) => {
   });
   if (res === false) return;
 
-  await channel.send("# " + matchedWords(lobby.word, letterWord));
+  let msg = await channel.send("# " + matchedWords(lobby.word, letterWord));
   if (letterWord === lobby.word) {
-    const msg = await channel.send(`${message.user} won! (+50xp)`);
     delete lobbies[message.channel.serverId];
+    msg = await msg.edit(msg.content + `\n${message.user} won! (+50xp)`);
     await addXp(
       message.user.id,
       message.channel.serverId,
