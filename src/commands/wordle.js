@@ -117,7 +117,9 @@ export const onMessage = async (bot, message) => {
   });
   if (res === false) return;
 
-  let msg = await channel.send("# " + matchedWords(lobby.word, letterWord));
+  let msg = await channel.send("# " + matchedWords(lobby.word, letterWord), {
+    silent: true,
+  });
   if (letterWord === lobby.word) {
     delete lobbies[message.channel.serverId];
     msg = await msg.edit(msg.content + `\n${message.user} won! (+50xp)`);
@@ -136,7 +138,7 @@ export const onMessage = async (bot, message) => {
 
 /**
  * @param {import("@nerimity/nerimity.js/build/Client.js").Client} bot
- * @param {import("@nerimity/nerimity.js/build/Client.js").Message} message
+ * @param {import("@nerimity/nerimiwwwty.js/build/Client.js").Message} message
  */
 const startCommand = async (bot, args, message) => {
   const channel = message.channel;
@@ -159,7 +161,5 @@ const startCommand = async (bot, args, message) => {
     word,
     length: letterWords,
   };
-  channel.send(
-    "Game Started! Start making your guesses. (" + letterWords + " letters)"
-  );
+  channel.send("Game Started! (" + letterWords + " letters)");
 };
