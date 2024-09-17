@@ -120,11 +120,7 @@ export const onMessage = async (bot, message) => {
   const letterWord = message.content.toLowerCase();
   const isValidWord = wordsObj[lobby.length].includes(letterWord);
   if (!isValidWord) return;
-  const res = await message.delete().catch(() => {
-    console.log("Missing permission: Delete message.");
-    return false;
-  });
-  if (res === false) return;
+  message.delete();
 
   let msg = await channel.send("# " + matchedWords(lobby.word, letterWord), {
     silent: true,
