@@ -29,7 +29,7 @@ const wordsObj = {
   6: words7,
 };
 
-const randomWord = (words = words5) => {
+const randomWord = (words) => {
   if (!words) return;
   return words[Math.floor(Math.random() * words.length)];
 };
