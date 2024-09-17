@@ -75,7 +75,7 @@ const matchedWords = (word, guess) => {
     }
   }
 
-  return str;
+  return str.toUpperCase();
 };
 
 /**
@@ -107,7 +107,7 @@ export const run = async (bot, args, message) => {
  */
 export const onMessage = async (bot, message) => {
   if (message.user.bot) return;
-  const lobby = lobbies[message.channel.serverId];
+  const lobby = { ...lobbies[message.channel.serverId] };
   if (!lobby) return;
   const channel = message.channel;
   if (!channel.name.toLowerCase().includes("wordle")) {
@@ -119,14 +119,22 @@ export const onMessage = async (bot, message) => {
   }
   const letterWord = message.content.toLowerCase();
   const isValidWord = wordsObj[lobby.length].includes(letterWord);
+  const hasWon = letterWord === lobby.word;
+  if (hasWon) {
+    delete lobbies[message.channel.serverId];
+  }
+
   if (!isValidWord) return;
-  message.delete();
+  const res = await message.delete().catch(() => {
+    console.log("Missing permission: Delete message.");
+    return false;
+  });
+  if (res === false) return;
 
   let msg = await channel.send("# " + matchedWords(lobby.word, letterWord), {
     silent: true,
   });
-  if (letterWord === lobby.word) {
-    delete lobbies[message.channel.serverId];
+  if (hasWon) {
     msg = await msg.edit(msg.content + `\n${message.user} won! (+50xp)`);
     await addXp(
       message.user.id,
