@@ -9,16 +9,24 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const words4 = JSON.parse(
+  await fs.readFile(__dirname + "/../4-letter-words.json", "utf-8")
+);
 const words5 = JSON.parse(
   await fs.readFile(__dirname + "/../5-letter-words.json", "utf-8")
 );
 const words6 = JSON.parse(
   await fs.readFile(__dirname + "/../6-letter-words.json", "utf-8")
 );
+const words7 = JSON.parse(
+  await fs.readFile(__dirname + "/../7-letter-words.json", "utf-8")
+);
 
 const wordsObj = {
+  4: words4,
   5: words5,
   6: words6,
+  6: words7,
 };
 
 const randomWord = (words = words5) => {
@@ -152,11 +160,15 @@ const startCommand = async (bot, args, message) => {
     return channel.send("There is already a game in progress.");
   }
   const letterWords = parseInt(args[2]) || 5;
-  if (letterWords !== 5 && letterWords !== 6) {
-    return channel.send("Only 5 and 6 letter words are allowed.");
-  }
 
   const word = randomWord(wordsObj[letterWords]);
+  if (!word) {
+    const maxNum = Object.keys(wordsObj).sort((a, b) => b - a)[0];
+    const minNum = Object.keys(wordsObj).sort((a, b) => a - b)[0];
+    return channel.send(
+      "Invalid. Please enter a number between " + minNum + " and " + maxNum
+    );
+  }
   lobbies[channel.serverId] = {
     word,
     length: letterWords,
