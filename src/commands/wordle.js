@@ -26,7 +26,7 @@ const wordsObj = {
   4: words4,
   5: words5,
   6: words6,
-  6: words7,
+  7: words7,
 };
 
 const randomWord = (words) => {
