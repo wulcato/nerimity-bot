@@ -82,9 +82,15 @@ const matchedWords = (word, guess) => {
  * @type {Record<string, {
  *   word: string
  *   length: number
+ *   messages: import("@nerimity/nerimity.js/build/Client.js").Message[]
  * }>}
  */
 const lobbies = {};
+
+/**
+ * @type {Record<string , import("@nerimity/nerimity.js/build/Client.js").Message[][]>}
+ */
+const roundMessages = {};
 
 /**
  * @param {import("@nerimity/nerimity.js/build/Client.js").Client} bot
@@ -134,7 +140,11 @@ export const onMessage = async (bot, message) => {
   let msg = await channel.send("# " + matchedWords(lobby.word, letterWord), {
     silent: true,
   });
+  if (!hasWon) {
+    lobbies[message.channel.serverId].messages.push(msg);
+  }
   if (hasWon) {
+    roundMessages[channel.serverId].at(-1).push(...lobby.messages);
     msg = await msg.edit(msg.content + `\n${message.user} won! (+50xp)`);
     await addXp(
       message.user.id,
@@ -174,9 +184,31 @@ const startCommand = async (bot, args, message) => {
       "Invalid. Please enter a number between " + minNum + " and " + maxNum
     );
   }
+  roundMessages[channel.serverId] = roundMessages[channel.serverId] || [];
+  roundMessages[channel.serverId].push([]);
   lobbies[channel.serverId] = {
     word,
     length: letterWords,
+    messages: [],
   };
   channel.send("Game Started! (" + letterWords + " letters)");
 };
+
+setInterval(() => {
+  for (const property in roundMessages) {
+    const serverRound = roundMessages[property];
+
+    if (serverRound.length <= 2) {
+      continue;
+    }
+
+    const messages = serverRound[0];
+    if (!messages?.length) {
+      roundMessages[property] = serverRound.filter((_, i) => i !== 0);
+      continue;
+    }
+    const message = messages.shift();
+    message?.delete().catch(() => {});
+    break;
+  }
+}, 5000);
