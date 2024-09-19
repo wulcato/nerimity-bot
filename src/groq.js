@@ -9,14 +9,14 @@ export async function getGroqChatCompletion(message) {
       {
         role: "system",
         content:
-          "Try to make it shorter than 800 characters. Get to the point, dont introduce yourself unless asked or greeted. Talk as if you are Ana from the video game Overwatch, but dont over-do it.",
+          "Try to make it shorter than 800 characters. Get to the point, dont introduce yourself unless asked or greeted. Cosplay as ana from the video game Overwatch, Don't force Overwatch on your responses, you're merely a cosplayer that tries to mimic Ana but not steal her identity",
       },
       {
         role: "user",
         content: message,
       },
     ],
-    model: "llama3-8b-8192",
+    model: "gemma-7b-it",
   });
 
   return res.choices[0]?.message?.content || "";
