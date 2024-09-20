@@ -34,10 +34,6 @@ const randomWord = (words) => {
   return words[Math.floor(Math.random() * words.length)];
 };
 
-const orangeHex = "[#FF9800]";
-const greenHex = "[#4CAF50]";
-const greyHex = "[#9E9E9E]";
-
 const matchedWords = (word, guess) => {
   let str = "";
   let wordCharCount = {};
@@ -61,21 +57,51 @@ const matchedWords = (word, guess) => {
 
   for (let i = 0; i < word.length; i++) {
     if (word[i] === guess[i]) {
-      str += greenHex + word[i];
+      str += `<div class="g">${guess[i].toUpperCase()}</div>`;
     } else if (word.includes(guess[i])) {
       const count = orangeCharCount[guess[i]];
       if (!count) {
-        str += greyHex + guess[i];
+        str += `<div class="w">${guess[i].toUpperCase()}</div>`;
         continue;
       }
       orangeCharCount[guess[i]]--;
-      str += orangeHex + guess[i];
+      str += `<div class="o">${guess[i].toUpperCase()}</div>`;
     } else {
-      str += greyHex + guess[i];
+      str += `<div class="w">${guess[i].toUpperCase()}</div>`;
     }
   }
 
-  return str.toUpperCase();
+  return `
+   <span>
+          ${str}
+        </span>
+        <style>
+        span {
+          display: flex;
+          gap: 2px;
+        }
+          div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: red;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+          }
+            .g {
+              background: #6aaa64;
+              }
+            .o {
+              background: #b59f3b;
+              }
+            .w {
+              background: #3a3a3c;
+              }
+        </style>
+  `;
 };
 
 /**
@@ -137,7 +163,8 @@ export const onMessage = async (bot, message) => {
   });
   if (res === false) return;
 
-  let msg = await channel.send("# " + matchedWords(lobby.word, letterWord), {
+  let msg = await channel.send("* *", {
+    htmlEmbed: matchedWords(lobby.word, letterWord),
     silent: true,
   });
   if (!hasWon) {
