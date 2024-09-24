@@ -156,7 +156,7 @@ const htmlProfileBuilder = (server, user, profile) => {
 
   return `
         <div class="ctn">
-            <div class="h">${user.username}<div class="sh">(${
+            <div class="h">${escapeHtml(user.username)}<div class="sh">(${
     profile === "server" ? "Server" : "User"
   } Profile)</div></div>
             <div class="t">Level ${level}</div>
@@ -217,7 +217,7 @@ const htmlLeaderBoardBuilder = (users, profile) => {
             ${users
               .map(
                 (user) => `
-                    <div>${user.username} ${user.totalXP}XP</div>
+                    <div>${escapeHtml(user.username)} ${user.totalXP}XP</div>
                 `
               )
               .join("")}
@@ -244,5 +244,14 @@ const htmlLeaderBoardBuilder = (users, profile) => {
         </style>
     `;
 };
+
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 bot.login(config.token);
