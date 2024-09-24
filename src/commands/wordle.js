@@ -168,7 +168,7 @@ export const onMessage = async (bot, message) => {
     silent: true,
   });
   if (!hasWon) {
-    lobbies[message.channel.serverId].messages.push(msg);
+    lobbies[message.channel.serverId]?.messages.push(msg);
   }
   if (hasWon) {
     roundMessages[channel.serverId].at(-1).push(...lobby.messages);
